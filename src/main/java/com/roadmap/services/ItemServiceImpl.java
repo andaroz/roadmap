@@ -21,13 +21,19 @@ public class ItemServiceImpl implements ItemService{
     private final ItemRepository itemRepository;
     private final ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
 
-    public Item getItemById(Long id, String currency) throws IOException {
+    public Item getItemById(Long id) {
         Item item = new Item ();
         Optional<Item> optional = itemRepository.findById (id);
 
         if (optional.isPresent ()){
             item = optional.get ();
         }
+        return item;
+    }
+
+
+    public Item getItemById(Long id, String currency) throws IOException {
+        Item item = getItemById(id);
         if (currency != null) {
             if (currency.equalsIgnoreCase (CommonConstants.CURRENCY_GBP)){
                 return itemWithConvertedPrices(item, currency);
@@ -37,12 +43,6 @@ public class ItemServiceImpl implements ItemService{
         }
         return item;
     }
-
-    public Item getItemById(Long id) {
-        Item item = itemRepository.getById (id);
-        return item;
-    }
-
 
     public List<Item> getAllItems(String currency) {
         List<Item>itemList =  itemRepository.findAll ();
@@ -58,7 +58,6 @@ public class ItemServiceImpl implements ItemService{
     }
 
     public List<Item> getAllItemsByType(String type, String currency) {
-
         List<Item>itemList = itemRepository.getAllItemsByType (type);
         log.debug ("Getting items......");
         if (currency == null || currency.equalsIgnoreCase (CommonConstants.CURRENCY_EUR)){
@@ -70,6 +69,21 @@ public class ItemServiceImpl implements ItemService{
         } else {
             return itemList;
         }
+    }
+
+    public void reduceAvailableAmount(double amount, Long id) {
+        Item item = getItemById(id);
+        double availableAmount = item.getAmountAvailable ();
+        if (availableAmount >= amount) {
+            double remainingAmount = availableAmount - amount;
+            itemRepository.updateAvailableAmount (remainingAmount, id);
+        }
+    }
+
+    public void increaseAvailableAmount(double amount, Long id){
+        Item item = getItemById (id);
+        double remainingAmount = item.getAmountAvailable () + amount;
+        itemRepository.updateAvailableAmount (remainingAmount, id);
     }
 
 
