@@ -12,6 +12,7 @@ import com.roadmap.utility.taxCalculation.ReducedVatPrice;
 import com.roadmap.utility.taxCalculation.TaxCalculator;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,18 +24,13 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     private final ItemRepository itemRepository;
     private ItemServiceImpl itemService;
     private TaxCalculator taxCalculator;
-    private double totalNetPrice = 0.00;
-    private double totalVat = 0.00;
-    private double totalGrossPrice = 0.00;
     private Originator originator = new Originator ();
     private CareTaker careTaker = new CareTaker ();
-    private int currentCheckoutState = 0;
-    private int savedCheckoutStates = 0;
-    int currentState;
+    private int currentState;
     private Checkout checkout;
     private CheckoutDetails checkoutDetails = new CheckoutDetails ();
 
-    public ShoppingCartFacadeImpl(ItemRepository itemRepository) {
+    public ShoppingCartFacadeImpl(ItemRepository itemRepository) throws IOException {
         this.itemRepository = itemRepository;
         this.itemService = new ItemServiceImpl (itemRepository);
         this.taxCalculator = new TaxCalculator ();
@@ -56,8 +52,8 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
                     Long listItemId = itemListItem.getKey ();
                     ItemWithPrice itemWithPrice = itemListItem.getValue ();
                     orderedAmount = itemWithPrice.getAmountOrdered () + amount;
-                    itemWithPrice.setAmountOrdered (orderedAmount);
                     if (listItemId.equals (itemId)) {
+                        itemWithPrice.setAmountOrdered (orderedAmount);
                         itemsInOrder.put (itemId, itemWithPrice);
                         itemAlreadyInTheOrder = true;
                     }
@@ -79,17 +75,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     @Override
     public Order getOrder(Order order) {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
-        for (Map.Entry<Long, ItemWithPrice> itemInOrder : itemsInOrder.entrySet ()) {
-            Long itemId = itemInOrder.getKey ();
-            Item item = itemService.getItemById (itemId);
-
-            if (item != null) {
-                ItemWithPrice itemWithPrice = getItemWithPrice (item);
-            }
-        }
-        order.setOrderItems (itemsInOrder);
         order.setTotalPrice (calculateTotalPrice (itemsInOrder));
-
         return order;
     }
 
@@ -205,22 +191,21 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 
     private Price calculateTotalPrice(HashMap<Long, ItemWithPrice> itemsInOrder) {
         Price totalPrice = new Price ();
+        double totalNetPrice = 0.00;
+        double totalVat = 0.00;
+        double totalGrossPrice = 0.00;
         if (itemsInOrder != null && itemsInOrder.size () > 0) {
             for (Map.Entry<Long, ItemWithPrice> itemListItem : itemsInOrder.entrySet ()) {
-                Long itemId = itemListItem.getKey ();
+                ItemWithPrice itemWithPrice = itemListItem.getValue ();
                 double amount = itemListItem.getValue ().getAmountOrdered ();
-                Item item = itemService.getItemById (itemId);
-
-                if (item != null) {
-                    Price priceOfItem = getPrice (item.getPrice (), item.getType ());
-                    totalNetPrice = +(priceOfItem.getNetPrice () * amount);
-                    totalVat = +(Double.valueOf (df.format (priceOfItem.getTax () * amount)));
-                    totalGrossPrice = +(Double.valueOf (df.format (priceOfItem.getGrossPrice () * amount)));
-                }
+                Price priceOfItem = itemWithPrice.getPrice ();
+                totalNetPrice += (priceOfItem.getNetPrice () * amount);
+                totalVat += (priceOfItem.getTax () * amount);
+                totalGrossPrice += (priceOfItem.getGrossPrice () * amount);
             }
-            totalPrice.setNetPrice (totalNetPrice);
-            totalPrice.setTax (totalVat);
-            totalPrice.setGrossPrice (totalGrossPrice);
+            totalPrice.setNetPrice (Double.valueOf (df.format (totalNetPrice)));
+            totalPrice.setTax (Double.valueOf (df.format (totalVat)));
+            totalPrice.setGrossPrice (Double.valueOf (df.format (totalGrossPrice)));
         }
         return totalPrice;
     }

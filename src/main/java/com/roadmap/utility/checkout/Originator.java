@@ -13,9 +13,14 @@ public class Originator {
 
     public Memento proceedToCheckout(Order order) {
         checkout = new Checkout ();
+        if (order.getOrderItems ().size ()!=0){
+
         checkoutDetails = new CheckoutDetails ();
         checkout.setCheckoutDetails (checkoutDetails);
         checkout.setOrder (order);
+        } else {
+            log.info ("You cannot proceed to checkout if there are no items in shopping cart");
+        }
         return new Memento (checkout);
     }
 

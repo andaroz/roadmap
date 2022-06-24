@@ -15,7 +15,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl{
 
 
     private final ItemRepository itemRepository;
@@ -36,7 +36,7 @@ public class ItemServiceImpl implements ItemService{
         Item item = getItemById(id);
         if (currency != null) {
             if (currency.equalsIgnoreCase (CommonConstants.CURRENCY_GBP)){
-                return itemWithConvertedPrices(item, currency);
+                return itemWithConvertedPrice(item, currency);
             }
         } else {
             return item;
@@ -87,12 +87,6 @@ public class ItemServiceImpl implements ItemService{
     }
 
 
-    public Double getTotalPrice(Item item) {
-
-        Double  totalPrice= 0.00;
-        return totalPrice;
-    }
-
     public List<Item> itemListWithConvertedPrices(List<Item> itemList, String currency) {
         switch (currency){
             case(CommonConstants.CURRENCY_GBP):
@@ -110,7 +104,7 @@ public class ItemServiceImpl implements ItemService{
         return itemList;
     }
 
-    public Item itemWithConvertedPrices(Item item, String currency) throws IOException {
+    public Item itemWithConvertedPrice(Item item, String currency) throws IOException {
         switch (currency){
         case(CommonConstants.CURRENCY_GBP):
                 convertEurToGbp.getGbp (item.getPrice ());
@@ -120,5 +114,4 @@ public class ItemServiceImpl implements ItemService{
         }
         return item;
     }
-
 }
