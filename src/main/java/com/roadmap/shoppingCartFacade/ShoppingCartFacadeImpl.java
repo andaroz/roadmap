@@ -114,11 +114,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     public Checkout setIdentity(Identity identity, Order order) {
         originator.setIdentity (order, identity);
         careTaker.addMemento (originator.storeInMemento ());
-        System.out.println ("Set Identity Get caretaker list size: " + careTaker.getSavedStates ().size ());
-        int listSize = careTaker.getSavedStates ().size ();
-        System.out.println ("Set Identity Get last added item in caretaker list: " + careTaker.getMemento (listSize - 1).getCheckout ().toString ());
         currentState = careTaker.getCurrentState ();
-        System.out.println ("Set Identity Get current state: " + currentState);
         return careTaker.getMemento (currentState).getCheckout ();
     }
 
@@ -128,8 +124,6 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         originator.setShippingAddress (order, shippingAddress, previousStateCheckoutDetails);
         careTaker.addMemento (originator.storeInMemento ());
         currentState = careTaker.getCurrentState ();
-        System.out.println ("Set Shipping address current state: " + currentState);
-        System.out.println ("Set Shipping address checkout: " + careTaker.getMemento (currentState).getCheckout ().toString ());
         return careTaker.getMemento (currentState).getCheckout ();
     }
 
@@ -146,6 +140,8 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     public Checkout proceedPayment(Order order) {
         CheckoutDetails checkoutDetails = getPreviousStateCheckoutDetails ();
         originator.proceedPayment (order, checkoutDetails);
+        careTaker.addMemento (originator.storeInMemento ());
+        currentState = careTaker.getCurrentState ();
 
         int mementoListSize = careTaker.getSavedStates ().size ();
         if (mementoListSize > 1) {
@@ -165,7 +161,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         return careTaker.getMemento (currentState).getCheckout ();
     }
 
-    private ItemWithPrice getItemWithPrice(Item item) {
+    public ItemWithPrice getItemWithPrice(Item item) {
         ItemWithPrice itemWithPrice = new ItemWithPrice ();
         itemWithPrice.setId (item.getId ());
         itemWithPrice.setName (item.getName ());
@@ -176,7 +172,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         return itemWithPrice;
     }
 
-    private Price getPrice(Double netPrice, String type) {
+    public Price getPrice(Double netPrice, String type) {
         Price price = new Price (netPrice);
         if (type.toUpperCase ().equalsIgnoreCase (Type.FRUIT.toString ()) ||
                 type.toUpperCase ().equalsIgnoreCase (Type.VEGETABLE.toString ())) {
@@ -189,7 +185,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         return price;
     }
 
-    private Price calculateTotalPrice(HashMap<Long, ItemWithPrice> itemsInOrder) {
+    public Price calculateTotalPrice(HashMap<Long, ItemWithPrice> itemsInOrder) {
         Price totalPrice = new Price ();
         double totalNetPrice = 0.00;
         double totalVat = 0.00;
@@ -210,7 +206,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         return totalPrice;
     }
 
-    private CheckoutDetails getPreviousStateCheckoutDetails() {
+    public CheckoutDetails getPreviousStateCheckoutDetails() {
         return careTaker.getMemento (careTaker.getCurrentState ()).getCheckout ().getCheckoutDetails ();
     }
 }

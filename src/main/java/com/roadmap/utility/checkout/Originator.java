@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Originator {
 
-//    private Order order;
     private Checkout checkout;
     private CheckoutDetails checkoutDetails;
 
@@ -26,15 +25,13 @@ public class Originator {
 
     public Memento setIdentity(Order order, Identity identity) {
         checkout = new Checkout ();
-        if (!checkoutDetails.isCheckedOut ()) {
-            if (identity.getName () != null && identity.getLastName () != null) {
-                checkoutDetails = new CheckoutDetails ();
-                checkoutDetails.setIdentity (identity);
-                checkout.setCheckoutDetails (checkoutDetails);
-                checkout.setOrder (order);
-            } else {
-                log.info ("Please fill in the name and surname");
-            }
+        if (identity.getName () != null && identity.getLastName () != null) {
+            checkoutDetails = new CheckoutDetails ();
+            checkoutDetails.setIdentity (identity);
+            checkout.setCheckoutDetails (checkoutDetails);
+            checkout.setOrder (order);
+        } else {
+            log.info ("Please fill in the name and surname");
         }
         return new Memento (checkout);
     }
@@ -78,8 +75,10 @@ public class Originator {
         return new Memento (checkout);
     }
 
-    public void proceedPayment(Order order, CheckoutDetails currentCheckoutDetails) {
+    public Memento proceedPayment(Order order, CheckoutDetails currentCheckoutDetails) {
         if (!currentCheckoutDetails.isCheckedOut ()) {
+            checkout = new Checkout ();
+            checkout.setOrder (order);
             Identity identity = currentCheckoutDetails.getIdentity ();
             ShippingAddress shippingAddress = currentCheckoutDetails.getShippingAddress ();
             PaymentDetails paymentDetails = currentCheckoutDetails.getPaymentDetails ();
@@ -94,7 +93,9 @@ public class Originator {
             } else {
                 currentCheckoutDetails.setCheckedOut (true);
             }
+            checkout.setCheckoutDetails (currentCheckoutDetails);
         }
+        return new Memento (checkout);
     }
 
     public Memento storeInMemento(){

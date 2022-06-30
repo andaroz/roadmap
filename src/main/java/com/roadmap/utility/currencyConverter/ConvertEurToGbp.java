@@ -10,7 +10,7 @@ import java.util.Properties;
 public class ConvertEurToGbp implements Expression {
 
     private Double value;
-    private static final DecimalFormat df = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
 
     public void getEur(Double amount) {
         this.value = amount;
@@ -24,6 +24,6 @@ public class ConvertEurToGbp implements Expression {
 
     @Override
     public Double interpret() {
-        return Double.valueOf (df.format (this.value));
+        return Double.valueOf (DECIMAL_FORMAT.format (this.value));
     }
 }

@@ -6,7 +6,6 @@ import com.roadmap.models.Type;
 import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
 import com.roadmap.utility.currencyConverter.ConvertEurToGbp;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,11 +15,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,13 +36,14 @@ class ShopControllerTest {
     private ShopController shopController;
 
     private MockMvc mockMvc;
-    private final ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
-    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
-    private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
 
+    private static final Long ID = 1L;
+    private final ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
     private Item item;
     private List<Item> items = new ArrayList<> ();
-    private Long id = 1L;
+    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
+    private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
 
     ShopControllerTest() throws IOException {
     }
@@ -51,7 +53,7 @@ class ShopControllerTest {
         MockitoAnnotations.initMocks (this);
         mockMvc = MockMvcBuilders.standaloneSetup (shopController).build ();
         item = new Item ();
-        item.setId (id);
+        item.setId (ID);
         item.setAmountAvailable (2.0);
         item.setPrice (2.0);
         item.setName ("Apple");
@@ -76,7 +78,7 @@ class ShopControllerTest {
         mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?currency=EUR"))
                 .andExpect (status ().isOk ());
 
-        Assertions.assertEquals (2, items.size ());
+        assertEquals (2, items.size ());
     }
 
     @Test
@@ -88,13 +90,13 @@ class ShopControllerTest {
         mockMvc.perform (get(CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?type=FRUIT&currency=EUR"))
                 .andExpect (status ().isOk ());
 
-        Assertions.assertEquals (1, fruits.size ());
-        Assertions.assertEquals (Type.FRUIT.toString (), fruits.get (0).getType ());
+        assertEquals (1, fruits.size ());
+        assertEquals (Type.FRUIT.toString (), fruits.get (0).getType ());
     }
 
     @Test
     void getItemById() throws Exception {
-        when(itemService.getItemById (id, CommonConstants.CURRENCY_EUR)).thenReturn (item);
+        when(itemService.getItemById (ID, CommonConstants.CURRENCY_EUR)).thenReturn (item);
 
         mockMvc.perform (get(CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/item?id=1&currency=EUR"))
                 .andExpect (status().isOk());
@@ -107,6 +109,21 @@ class ShopControllerTest {
         Double convertedPrice = convertEurToGbp.interpret ();
         item.setPrice (convertedPrice);
         when (itemService.itemWithConvertedPrice (item, CommonConstants.CURRENCY_GBP)).thenReturn (item);
-        Assertions.assertEquals (price * eurToGbp, item.getPrice ());
+        assertEquals (price * eurToGbp, item.getPrice ());
+    }
+
+    @Test
+    void itemListWithConvertedPrices() throws Exception{
+        List<Item> convertedItems = new ArrayList<> ();
+
+        for (Item item: items) {
+            double price = item.getPrice ();
+            convertEurToGbp.getGbp (price);
+            double convertedPrice = convertEurToGbp.interpret ();
+            item.setPrice (convertedPrice);
+            convertedItems.add (item);
+            assertEquals (Double.valueOf (DECIMAL_FORMAT.format (price * eurToGbp)), item.getPrice ());
+        }
+        assertEquals (2, convertedItems.size ());
     }
 }

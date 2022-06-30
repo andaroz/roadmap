@@ -30,11 +30,12 @@ class ShoppingCartControllerTest {
     private ShoppingCartController shoppingCartController;
 
     private MockMvc mockMvc;
+
+    private final long ID = 1L;
+    private final String PATH = CommonConstants.BASE_PATH + CommonConstants.SHOPING_CART_PATH;
     private Item item;
     private List<Item> items = new ArrayList<> ();
     private Order order;
-    private final long ID = 1L;
-    private final String PATH = CommonConstants.BASE_PATH + CommonConstants.SHOPING_CART_PATH;
     private Checkout checkout = new Checkout ();
     private CheckoutDetails checkoutDetails = new CheckoutDetails ();
     private Identity identity = new Identity ();

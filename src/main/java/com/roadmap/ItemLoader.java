@@ -67,6 +67,6 @@ public class ItemLoader implements CommandLineRunner {
 //                .shoppingCart (null)
                 .build ());
 
-        log.debug ("Items Loaded: " + itemRepository.findAll ().size ());
+        log.info ("Items Loaded: " + itemRepository.findAll ().size ());
     }
 }

@@ -47,8 +47,6 @@ public class ItemServiceImpl{
     public List<Item> getAllItems(String currency) {
         List<Item>itemList =  itemRepository.findAll ();
         if (currency == null || currency.equalsIgnoreCase (CommonConstants.CURRENCY_EUR)){
-            System.out.println ("Not converting");
-            log.debug ("Get all items: " + itemList.toString ());
             return itemList;
         } else if (currency.equalsIgnoreCase (CommonConstants.CURRENCY_GBP)){
             return itemListWithConvertedPrices(itemList, currency);
@@ -59,10 +57,8 @@ public class ItemServiceImpl{
 
     public List<Item> getAllItemsByType(String type, String currency) {
         List<Item>itemList = itemRepository.getAllItemsByType (type);
-        log.debug ("Getting items......");
         if (currency == null || currency.equalsIgnoreCase (CommonConstants.CURRENCY_EUR)){
             System.out.println (itemList.toString ());
-            log.info ("Get all items by type: "+itemList.toString ());
             return itemList;
         } else if (currency.equalsIgnoreCase (CommonConstants.CURRENCY_GBP)){
             return itemListWithConvertedPrices(itemList, currency);
