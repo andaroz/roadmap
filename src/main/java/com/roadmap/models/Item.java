@@ -40,4 +40,18 @@ public class Item {
         this.amountAvailable = amountAvailable;
 //        this.shoppingCart = shoppingCart;
     }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", uom='" + uom + '\'' +
+                ", image='" + image + '\'' +
+                ", type='" + type + '\'' +
+                ", price=" + price +
+                ", amountAvailable=" + amountAvailable +
+                '}';
+    }
 }

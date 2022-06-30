@@ -1,8 +1,11 @@
 package com.roadmap.controllers;
 
+import com.roadmap.config.PropertiesLoader;
 import com.roadmap.models.Item;
 import com.roadmap.models.Type;
 import com.roadmap.services.ItemServiceImpl;
+import com.roadmap.utility.CommonConstants;
+import com.roadmap.utility.currencyConverter.ConvertEurToGbp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,16 +14,20 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ShopControllerTest {
-
-    private static final String CURRENCY_EUR = "EUR";
 
     @Mock
     private ItemServiceImpl itemService;
@@ -30,58 +37,93 @@ class ShopControllerTest {
 
     private MockMvc mockMvc;
 
+    private static final Long ID = 1L;
+    private final ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
+    private Item item;
+    private List<Item> items = new ArrayList<> ();
+    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
+    private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
+
+    ShopControllerTest() throws IOException {
+    }
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks (this);
         mockMvc = MockMvcBuilders.standaloneSetup (shopController).build ();
+        item = new Item ();
+        item.setId (ID);
+        item.setAmountAvailable (2.0);
+        item.setPrice (2.0);
+        item.setName ("Apple");
+        item.setDescription ("Red apple");
+        item.setType (Type.FRUIT.toString ());
+        items.add (item);
 
-    }
-
-    @Test
-    void getItemsByType() throws Exception {
-        List<Item> items = new ArrayList<> ();
-        items.add (new Item ());
-        items.add (new Item ());
-
-        when (itemService.getAllItemsByType (Type.FRUIT.toString (), CURRENCY_EUR)).thenReturn (items);
-        mockMvc.perform (get("/eShop/items?type=FRUIT&currency=EUR"))
-                .andExpect (status ().isOk ());
-//        for (Item item : items) {
-//            Assert.that ();
-//        }
-
+        Item vegetable = new Item ();
+        vegetable.setId (2L);
+        vegetable.setType (Type.VEGETABLE.toString ());
+        vegetable.setName ("Carrot");
+        vegetable.setDescription ("Eco carrot");
+        vegetable.setPrice (1.0);
+        vegetable.setAmountAvailable (4.0);
+        items.add (vegetable);
     }
 
     @Test
     void getAllItems() throws Exception {
-        List<Item> items = new ArrayList<> ();
-        items.add (new Item ());
-        items.add (new Item ());
+        when (itemService.getAllItems (CommonConstants.CURRENCY_EUR)).thenReturn (items);
 
-        when (itemService.getAllItems (CURRENCY_EUR)).thenReturn (items);
-
-        mockMvc.perform (get ("/eShop/items?currency=EUR"))
+        mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?currency=EUR"))
                 .andExpect (status ().isOk ());
+
+        assertEquals (2, items.size ());
+    }
+
+    @Test
+    void getItemsByType() throws Exception {
+        List<Item> fruits = items.stream ()
+                .filter (i -> i.getType ().equals (Type.FRUIT.toString ()))
+                .collect (Collectors.toList ());
+        doReturn (fruits).when (itemService).getAllItemsByType (Type.FRUIT.toString (), CommonConstants.CURRENCY_EUR);
+        mockMvc.perform (get(CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?type=FRUIT&currency=EUR"))
+                .andExpect (status ().isOk ());
+
+        assertEquals (1, fruits.size ());
+        assertEquals (Type.FRUIT.toString (), fruits.get (0).getType ());
     }
 
     @Test
     void getItemById() throws Exception {
-        Long id = 1L;
-        when(itemService.getItemById (id, CURRENCY_EUR)).thenReturn (new Item ());
+        when(itemService.getItemById (ID, CommonConstants.CURRENCY_EUR)).thenReturn (item);
 
-        mockMvc.perform (get("/eShop/item?id=1&currency=EUR"))
+        mockMvc.perform (get(CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/item?id=1&currency=EUR"))
                 .andExpect (status().isOk());
     }
 
     @Test
-    void getItemsByType1() {
+    void getItemsByTypeWithConvertedPrice() throws Exception{
+        double price = item.getPrice ();
+        convertEurToGbp.getGbp (price);
+        Double convertedPrice = convertEurToGbp.interpret ();
+        item.setPrice (convertedPrice);
+        when (itemService.itemWithConvertedPrice (item, CommonConstants.CURRENCY_GBP)).thenReturn (item);
+        assertEquals (price * eurToGbp, item.getPrice ());
     }
 
     @Test
-    void getAllItems1() {
-    }
+    void itemListWithConvertedPrices() throws Exception{
+        List<Item> convertedItems = new ArrayList<> ();
 
-    @Test
-    void getItemById1() {
+        for (Item item: items) {
+            double price = item.getPrice ();
+            convertEurToGbp.getGbp (price);
+            double convertedPrice = convertEurToGbp.interpret ();
+            item.setPrice (convertedPrice);
+            convertedItems.add (item);
+            assertEquals (Double.valueOf (DECIMAL_FORMAT.format (price * eurToGbp)), item.getPrice ());
+        }
+        assertEquals (2, convertedItems.size ());
     }
 }

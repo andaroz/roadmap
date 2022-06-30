@@ -11,6 +11,7 @@ public class ItemWithPrice{
    private String name;
    private String description;
    private String uom;
+   private String type;
    private String image;
    private Price price;
    private Double amountOrdered = 0.00;

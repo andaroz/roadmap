@@ -39,6 +39,4 @@ public class ShopController {
     public Item getItemById(@PathParam ("id") String id, @PathParam ("currency") String currency) throws IOException {
         return itemService.getItemById (Long.parseLong (id), currency);
     }
-
-
 }

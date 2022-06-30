@@ -1,15 +1,14 @@
 package com.roadmap.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Identity {
+    @NonNull
     private String name;
+    @NonNull
     private String lastName;
 }

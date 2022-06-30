@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.ContextConfiguration;
 
 @Slf4j
 @RequiredArgsConstructor
+@ContextConfiguration
 @Component
 public class ItemLoader implements CommandLineRunner {
 
@@ -67,6 +69,6 @@ public class ItemLoader implements CommandLineRunner {
 //                .shoppingCart (null)
                 .build ());
 
-        log.info ("Items Loaded: " + itemRepository.findAll ().size ());
+        log.debug ("Items Loaded: " + itemRepository.findAll ().size ());
     }
 }
