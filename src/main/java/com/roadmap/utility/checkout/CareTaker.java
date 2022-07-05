@@ -8,19 +8,19 @@ public class CareTaker {
     private List<Memento> savedStates;
     private int currentState = 0;
 
-    public CareTaker(){
+    public CareTaker() {
         this.savedStates = new ArrayList<> ();
     }
 
-    public int getCurrentState(){
+    public int getCurrentState() {
         return currentState;
     }
 
-    public List<Memento> getSavedStates(){
+    public List<Memento> getSavedStates() {
         return savedStates;
     }
 
-    public void addMemento(Memento memento){
+    public void addMemento(Memento memento) {
         savedStates.add (memento);
         currentState = savedStates.size () - 1;
     }
@@ -29,23 +29,23 @@ public class CareTaker {
         return savedStates.get (index);
     }
 
-    public Memento undo(){
-        if (currentState <= 0){
+    public Memento undo() {
+        if (currentState <= 0) {
             currentState = 0;
             return getMemento (currentState);
         } else {
-            currentState --;
+            currentState--;
             return getMemento (currentState);
         }
     }
 
-    public Memento redo(){
+    public Memento redo() {
         if (currentState >= savedStates.size () - 1) {
-            currentState = savedStates.size () -1;
+            currentState = savedStates.size () - 1;
             return getMemento (currentState);
         } else {
-            currentState ++;
-            return getMemento(currentState);
+            currentState++;
+            return getMemento (currentState);
         }
     }
 }

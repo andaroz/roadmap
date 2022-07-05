@@ -16,7 +16,7 @@ class ConvertEurToGbpTest {
     private double eur = 1.52;
     private double convertedValue;
     private ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
-    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
+    private Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
     private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
 
     ConvertEurToGbpTest() throws IOException {

@@ -8,7 +8,7 @@ public class ReducedVatPrice {
     }
 
     public Price accept(Tax tax) {
-        return tax.visit(this);
+        return tax.visit (this);
     }
 
     public Price getPrice() {

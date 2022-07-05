@@ -24,13 +24,15 @@ import static org.mockito.Mockito.*;
 public class ItemServiceImplTest {
 
     @Mock
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
+
     @Mock
-    ItemServiceImpl itemService = new ItemServiceImpl (itemRepository);
-    Item item;
-    List<Item> items = new ArrayList<> ();
+    private ItemServiceImpl itemService = new ItemServiceImpl (itemRepository);
+
+    private Item item;
+    private List<Item> items = new ArrayList<> ();
     private final ConvertEurToGbp convertEurToGbp = new ConvertEurToGbp ();
-    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
+    private Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
     private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
 
     public ItemServiceImplTest() throws IOException {

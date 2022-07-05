@@ -1,14 +1,12 @@
 package com.roadmap.shoppingCartFacade;
 
 import com.roadmap.models.*;
-import com.roadmap.repositories.ItemRepository;
 import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
 import com.roadmap.utility.checkout.CareTaker;
 import com.roadmap.utility.checkout.Memento;
 import com.roadmap.utility.checkout.Originator;
 import com.roadmap.utility.taxCalculation.Price;
-import com.roadmap.utility.taxCalculation.TaxCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,17 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 
 class ShoppingCartFacadeImplTest {
 
     @Mock
-    private ItemRepository itemRepository;
-
-    @Mock
     private ItemServiceImpl itemService;
     @Mock
-    private ShoppingCartFacadeImpl shoppingCartFacade = new ShoppingCartFacadeImpl (itemRepository);
+    private ShoppingCartFacadeImpl shoppingCartFacade;
 
     private static final Long ID = 1L;
     private static final String NAME = "Name";
@@ -47,7 +43,6 @@ class ShoppingCartFacadeImplTest {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
     private int currentState = 0;
     private Originator originator = new Originator ();
-    private TaxCalculator taxCalculator;
     private CareTaker careTaker = new CareTaker ();
     private Checkout checkout = new Checkout ();
     private Item item;
@@ -60,13 +55,13 @@ class ShoppingCartFacadeImplTest {
     private Identity identity = new Identity ();
     private ShippingAddress shippingAddress = new ShippingAddress ();
     private PaymentDetails paymentDetails = new PaymentDetails ();
-    Item vegetable = new Item ();
+    private Item vegetable = new Item ();
 
     ShoppingCartFacadeImplTest() throws IOException {
     }
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         MockitoAnnotations.initMocks (this);
         item = new Item ();
         item.setId (ID);
@@ -107,7 +102,7 @@ class ShoppingCartFacadeImplTest {
     void addToOrder() {
         double amount = 1.0;
         long id = 2L;
-        ItemWithPrice newItemWithThePrice = getItemWithPrice(vegetable);
+        ItemWithPrice newItemWithThePrice = getItemWithPrice (vegetable);
         newItemWithThePrice.setAmountOrdered (amount);
         itemsInOrder.put (id, newItemWithThePrice);
         assertEquals (2, itemsInOrder.size ());
@@ -120,7 +115,7 @@ class ShoppingCartFacadeImplTest {
     @Test
     void getOrder() {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
-        doReturn(price).when (shoppingCartFacade).calculateTotalPrice (itemsInOrder);
+        doReturn (price).when (shoppingCartFacade).calculateTotalPrice (itemsInOrder);
         order.setTotalPrice (price);
         assertEquals (itemWithPrice.getPrice ().getGrossPrice (), order.getTotalPrice ().getGrossPrice ());
         assertEquals (1, order.getOrderItems ().size ());
@@ -171,7 +166,6 @@ class ShoppingCartFacadeImplTest {
         assertEquals (STREET, savedShippingAddress.getStreet ());
         assertEquals (HOUSE_NUMBER, savedShippingAddress.getHouseNameOrNumber ());
         assertEquals (ZIP, savedShippingAddress.getZip ());
-
     }
 
     @Test
@@ -215,16 +209,16 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void undo() {
-//        proceedPayment and validate checkout which is saved in in Memento list
+        // proceedPayment and validate checkout which is saved in in Memento list
         checkout.setOrder (order);
-        checkout.setCheckoutDetails (new CheckoutDetails());
-        Memento memento = new Memento(checkout);
+        checkout.setCheckoutDetails (new CheckoutDetails ());
+        Memento memento = new Memento (checkout);
         careTaker.addMemento (memento);
         currentState = careTaker.getCurrentState ();
         Checkout newCheckout = careTaker.getMemento (currentState).getCheckout ();
         assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
         assertNull (checkoutDetails.getIdentity ());
-//      add identity and validate new state
+        // add identity and validate new state
         originator.setIdentity (order, setIdentityData ());
         careTaker.addMemento (originator.storeInMemento ());
         currentState = careTaker.getCurrentState ();
@@ -233,7 +227,7 @@ class ShoppingCartFacadeImplTest {
         assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
         assertEquals (NAME, savedIdentity.getName ());
         assertEquals (LAST_NAME, savedIdentity.getLastName ());
-//      undo setIdentity and validate that current state is the same as before
+        // undo setIdentity and validate that current state is the same as before
         careTaker.undo ();
         currentState = careTaker.getCurrentState ();
         Checkout previousCheckout = careTaker.getMemento (currentState).getCheckout ();
@@ -243,13 +237,13 @@ class ShoppingCartFacadeImplTest {
         assertEquals (2, careTaker.getSavedStates ().size ());
     }
 
-    private Identity setIdentityData(){
+    private Identity setIdentityData() {
         identity.setName (NAME);
         identity.setLastName (LAST_NAME);
         return identity;
     }
 
-    private ShippingAddress setShippingAddressData(){
+    private ShippingAddress setShippingAddressData() {
         shippingAddress.setCountry (COUNTRY);
         shippingAddress.setStreet (STREET);
         shippingAddress.setHouseNameOrNumber (HOUSE_NUMBER);
@@ -257,7 +251,7 @@ class ShoppingCartFacadeImplTest {
         return shippingAddress;
     }
 
-    private PaymentDetails setPaymentDetailsData(){
+    private PaymentDetails setPaymentDetailsData() {
         paymentDetails.setCardOwner (CARD_OWNER);
         paymentDetails.setCardNumber (CARD_NUMBER);
         paymentDetails.setExpiryDate (EXPIRY_DATE);
@@ -269,7 +263,7 @@ class ShoppingCartFacadeImplTest {
         ItemWithPrice itemWithPrice = new ItemWithPrice ();
         double itemPrice = item.getPrice ();
         double tax = Double.valueOf (DECIMAL_FORMAT.format (itemPrice * 0.05));
-        Price price = new Price();
+        Price price = new Price ();
         price.setNetPrice (itemPrice);
         price.setTax (tax);
         price.setGrossPrice (itemPrice + tax);

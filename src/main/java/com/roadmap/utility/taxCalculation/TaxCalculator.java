@@ -24,7 +24,7 @@ public class TaxCalculator implements Tax {
         Double tax = netoPrice * vatFull;
         price.setNetPrice (netoPrice);
         price.setTax (Double.valueOf (DECIMAL_FORMAT.format (tax)));
-        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format(netoPrice + tax)));
+        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format (netoPrice + tax)));
         return price;
     }
 
@@ -34,8 +34,8 @@ public class TaxCalculator implements Tax {
         Double netoPrice = reducedVatPrice.getPrice ().getNetPrice ();
         Double tax = netoPrice * vatReduced;
         price.setNetPrice (netoPrice);
-        price.setTax (Double.valueOf (DECIMAL_FORMAT.format(tax)));
-        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format(netoPrice + tax)));
+        price.setTax (Double.valueOf (DECIMAL_FORMAT.format (tax)));
+        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format (netoPrice + tax)));
         return price;
     }
 
@@ -45,8 +45,8 @@ public class TaxCalculator implements Tax {
         Double netoPrice = zeroVatPrice.getPrice ().getNetPrice ();
         Double tax = netoPrice * vatZero;
         price.setNetPrice (netoPrice);
-        price.setTax (Double.valueOf (DECIMAL_FORMAT.format(tax)));
-        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format(netoPrice + tax)));
+        price.setTax (Double.valueOf (DECIMAL_FORMAT.format (tax)));
+        price.setGrossPrice (Double.valueOf (DECIMAL_FORMAT.format (netoPrice + tax)));
         return price;
     }
 }

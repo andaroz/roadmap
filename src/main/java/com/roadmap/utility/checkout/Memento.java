@@ -6,7 +6,11 @@ public class Memento {
 
     private Checkout checkout;
 
-    public Memento (Checkout newCheckout) {this.checkout = newCheckout;}
+    public Memento(Checkout newCheckout) {
+        this.checkout = newCheckout;
+    }
 
-    public Checkout getCheckout(){return checkout;}
+    public Checkout getCheckout() {
+        return checkout;
+    }
 }

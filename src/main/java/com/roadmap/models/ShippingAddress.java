@@ -7,12 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShippingAddress {
-    @NonNull
     private String country;
-    @NonNull
     private String street;
-    @NonNull
     private String houseNameOrNumber;
-    @NonNull
     private String zip;
 }

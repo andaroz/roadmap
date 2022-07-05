@@ -18,12 +18,12 @@ public class ItemLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        loadItems();
+        loadItems ();
     }
 
     private void loadItems() {
 
-        Item apple = itemRepository.save (Item.builder()
+        Item apple = itemRepository.save (Item.builder ()
                 .name ("apple")
                 .description ("Red apple")
                 .uom (UOM.KG.toString ())
@@ -31,10 +31,9 @@ public class ItemLoader implements CommandLineRunner {
                 .type (Type.FRUIT.toString ())
                 .price (1.5)
                 .amountAvailable (3.0)
-//                .shoppingCart (null)
                 .build ());
 
-        Item pear = itemRepository.save (Item.builder()
+        Item pear = itemRepository.save (Item.builder ()
                 .name ("pear")
                 .description ("Pear Conference")
                 .uom (UOM.KG.toString ())
@@ -42,10 +41,9 @@ public class ItemLoader implements CommandLineRunner {
                 .type (Type.FRUIT.toString ())
                 .price (1.75)
                 .amountAvailable (10.0)
-//                .shoppingCart (null)
                 .build ());
 
-        Item milk = itemRepository.save (Item.builder()
+        Item milk = itemRepository.save (Item.builder ()
                 .name ("Coconut milk")
                 .description ("Coconut milk")
                 .uom (UOM.L.toString ())
@@ -53,10 +51,9 @@ public class ItemLoader implements CommandLineRunner {
                 .type (Type.DRINK.toString ())
                 .price (2.00)
                 .amountAvailable (7.0)
-//                .shoppingCart (null)
                 .build ());
 
-        Item cucumber = itemRepository.save (Item.builder()
+        Item cucumber = itemRepository.save (Item.builder ()
                 .name ("Cucumber")
                 .description ("Farmers market cucumber")
                 .uom (UOM.KG.toString ())
@@ -64,7 +61,6 @@ public class ItemLoader implements CommandLineRunner {
                 .type (Type.VEGETABLE.toString ())
                 .price (2.10)
                 .amountAvailable (2.0)
-//                .shoppingCart (null)
                 .build ());
 
         log.info ("Items Loaded: " + itemRepository.findAll ().size ());
