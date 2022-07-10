@@ -1,9 +1,6 @@
 package com.roadmap.models;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,8 +11,9 @@ import javax.persistence.*;
 public class Item {
 
     @Id
-    @Column(name="Id")
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @Column(name = "Id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @NonNull
     private Long id;
     private String name;
     private String description;
@@ -24,8 +22,6 @@ public class Item {
     private String type;
     private Double price;
     private Double amountAvailable = 0.0;
-//    @OneToOne
-//    private ShoppingCart shoppingCart;
 
     @Builder
     public Item(Long id, String name, String description, String uom, String image,
@@ -38,7 +34,6 @@ public class Item {
         this.type = type;
         this.price = price;
         this.amountAvailable = amountAvailable;
-//        this.shoppingCart = shoppingCart;
     }
 
     @Override

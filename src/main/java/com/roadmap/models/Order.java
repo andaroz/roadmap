@@ -9,19 +9,14 @@ import java.util.HashMap;
 
 @Getter
 @Setter
-//@Entity
 @AllArgsConstructor
 public class Order {
-//    @Id
-//    @Column(name="Id")
-//    @GeneratedValue(strategy= GenerationType.AUTO)
-//    private Long id;
+
     private static Order instance = null;
     private HashMap<Long, ItemWithPrice> orderItems;
     private Price totalPrice;
 
-
-    public Order(){
+    public Order() {
         this.orderItems = new HashMap<> ();
         this.totalPrice = new Price ();
     }

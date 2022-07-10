@@ -1,5 +1,6 @@
 package com.roadmap.shoppingCartFacade;
 
+import com.roadmap.exceptions.BadRequestException;
 import com.roadmap.models.*;
 import com.roadmap.repositories.ItemRepository;
 import com.roadmap.services.ItemServiceImpl;
@@ -27,22 +28,26 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     private Originator originator = new Originator ();
     private CareTaker careTaker = new CareTaker ();
     private int currentState;
-    private Checkout checkout;
-    private CheckoutDetails checkoutDetails = new CheckoutDetails ();
+    private Order order;
 
-    public ShoppingCartFacadeImpl(ItemRepository itemRepository) throws IOException {
+    public ShoppingCartFacadeImpl(ItemRepository itemRepository, Order order) throws IOException {
         this.itemRepository = itemRepository;
         this.itemService = new ItemServiceImpl (itemRepository);
         this.taxCalculator = new TaxCalculator ();
+        if (order.getInstance () == null) {
+            this.order = new Order ();
+        } else {
+            this.order = order;
+        }
     }
 
     @Override
-    public void addToOrder(Long itemId, double amount, Order order) {
+    public Order addToOrder(Long itemId, double amount) {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
         Item item = itemService.getItemById (itemId);
 
         boolean itemAlreadyInTheOrder = false;
-        double orderedAmount = 0.00;
+        double orderedAmount = 0.0;
 
         if (item.getAmountAvailable () < amount) {
             System.out.println ("There is only " + item.getAmountAvailable () + " for item " + item.getName () + ". Please choose amount which is available!");
@@ -69,18 +74,18 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
             itemService.reduceAvailableAmount (amount, itemId);
             order.setTotalPrice (calculateTotalPrice (itemsInOrder));
         }
-
+        return order;
     }
 
     @Override
-    public Order getOrder(Order order) {
+    public Order getOrder() {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
         order.setTotalPrice (calculateTotalPrice (itemsInOrder));
         return order;
     }
 
     @Override
-    public void removeFromOrder(Long itemId, double amount, Order order) {
+    public Order removeFromOrder(Long itemId, double amount) {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
         for (Map.Entry<Long, ItemWithPrice> itemInOrder : itemsInOrder.entrySet ()) {
             Long orderItemId = itemInOrder.getKey ();
@@ -100,48 +105,90 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
             }
         }
         order.setTotalPrice (calculateTotalPrice (itemsInOrder));
+        return order;
     }
 
     @Override
-    public Checkout proceedToCheckout(Order order) {
-        originator.proceedToCheckout (order);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        return careTaker.getMemento (currentState).getCheckout ();
+    public Checkout proceedToCheckout() {
+        if (order.getOrderItems ().size () == 0) {
+            throw new BadRequestException (CommonConstants.MESSAGE_MISSING_ITEMS_IN_ORDER, true);
+        } else {
+            originator.proceedToCheckout (order);
+            careTaker.addMemento (originator.storeInMemento ());
+            currentState = careTaker.getCurrentState ();
+            return careTaker.getMemento (currentState).getCheckout ();
+        }
     }
 
     @Override
-    public Checkout setIdentity(Identity identity, Order order) {
-        originator.setIdentity (order, identity);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        return careTaker.getMemento (currentState).getCheckout ();
+    public Checkout setIdentity(Identity identity) {
+        if (identity == null || identity.getName () == null || identity.getLastName () == null) {
+            throw new BadRequestException ();
+        } else {
+            originator.setIdentity (order, identity);
+            careTaker.addMemento (originator.storeInMemento ());
+            currentState = careTaker.getCurrentState ();
+            return careTaker.getMemento (currentState).getCheckout ();
+        }
     }
 
     @Override
-    public Checkout setShippingAddress(ShippingAddress shippingAddress, Order order) {
-        CheckoutDetails previousStateCheckoutDetails = getPreviousStateCheckoutDetails ();
-        originator.setShippingAddress (order, shippingAddress, previousStateCheckoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        return careTaker.getMemento (currentState).getCheckout ();
+    public Checkout setShippingAddress(ShippingAddress shippingAddress) {
+        if (shippingAddress == null || shippingAddress.getCountry () == null || shippingAddress.getStreet () == null ||
+                shippingAddress.getHouseNameOrNumber () == null || shippingAddress.getZip () == null) {
+            throw new BadRequestException ();
+        } else {
+            CheckoutDetails previousStateCheckoutDetails = getPreviousStateCheckoutDetails ();
+            if (previousStateCheckoutDetails.getIdentity () == null) {
+                throw new BadRequestException (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, true);
+            } else {
+                originator.setShippingAddress (order, shippingAddress, previousStateCheckoutDetails);
+                careTaker.addMemento (originator.storeInMemento ());
+                currentState = careTaker.getCurrentState ();
+                return careTaker.getMemento (currentState).getCheckout ();
+            }
+        }
     }
 
     @Override
-    public Checkout setPaymentDetails(PaymentDetails paymentDetails, Order order) {
-        CheckoutDetails previousStateCheckoutDetails = getPreviousStateCheckoutDetails ();
-        originator.setPaymentDetails (order, paymentDetails, previousStateCheckoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        return careTaker.getMemento (currentState).getCheckout ();
+    public Checkout setPaymentDetails(PaymentDetails paymentDetails) {
+        if (paymentDetails == null || paymentDetails.getCardOwner () == null || paymentDetails.getCardNumber () == null ||
+                paymentDetails.getExpiryDate () == null || paymentDetails.getCvc () == null) {
+            throw new BadRequestException ();
+        } else {
+            CheckoutDetails previousStateCheckoutDetails = getPreviousStateCheckoutDetails ();
+            if (previousStateCheckoutDetails.getIdentity () == null) {
+                throw new BadRequestException (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, true);
+            } else if (previousStateCheckoutDetails.getShippingAddress () == null) {
+                throw new BadRequestException (CommonConstants.MESSAGE_MISSING_SHIPPING_INFORMATION, true);
+            } else {
+                originator.setPaymentDetails (order, paymentDetails, previousStateCheckoutDetails);
+                careTaker.addMemento (originator.storeInMemento ());
+                currentState = careTaker.getCurrentState ();
+                return careTaker.getMemento (currentState).getCheckout ();
+            }
+        }
     }
 
     @Override
-    public Checkout proceedPayment(Order order) {
+    public Checkout proceedPayment() {
         CheckoutDetails checkoutDetails = getPreviousStateCheckoutDetails ();
-        originator.proceedPayment (order, checkoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
+        Identity identity = checkoutDetails.getIdentity ();
+        ShippingAddress shippingAddress = checkoutDetails.getShippingAddress ();
+        PaymentDetails paymentDetails = checkoutDetails.getPaymentDetails ();
+        if (order.getOrderItems () == null) {
+            throw new BadRequestException (CommonConstants.MESSAGE_MISSING_ITEMS_IN_ORDER, true);
+        } else if (identity == null) {
+            throw new BadRequestException (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, true);
+        } else if (shippingAddress == null) {
+            throw new BadRequestException (CommonConstants.MESSAGE_MISSING_SHIPPING_INFORMATION, true);
+        } else if (paymentDetails == null) {
+            throw new BadRequestException (CommonConstants.MESSAGE_MISSING_PAYMENT_INFORMATION, true);
+        } else {
+            originator.proceedPayment (order, checkoutDetails);
+            careTaker.addMemento (originator.storeInMemento ());
+            currentState = careTaker.getCurrentState ();
+        }
 
         int mementoListSize = careTaker.getSavedStates ().size ();
         if (mementoListSize > 1) {

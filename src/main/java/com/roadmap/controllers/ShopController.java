@@ -2,11 +2,10 @@ package com.roadmap.controllers;
 
 import com.roadmap.models.Item;
 import com.roadmap.services.ItemServiceImpl;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 import java.io.IOException;
@@ -22,21 +21,18 @@ public class ShopController {
         this.itemService = itemService;
     }
 
-    @GetMapping(path ="/items/byType{type}{currency}",  produces= MediaType.APPLICATION_JSON_VALUE)
-    public List<Item> getItemsByType(@PathParam("type") String type, @PathParam ("currency") String currency){
+    @GetMapping(path = "/items/byType{type}{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Item> getItemsByType(@PathParam("type") String type, @PathParam("currency") String currency) {
         return itemService.getAllItemsByType (type, currency);
     }
 
-    @GetMapping(path ="/items{currency}",  produces= MediaType.APPLICATION_JSON_VALUE)
-    public List<Item> getAllItems(@PathParam ("currency") String currency){
+    @GetMapping(path = "/items{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Item> getAllItems(@PathParam("currency") String currency) {
         return itemService.getAllItems (currency);
     }
 
-    @Value ("${eurToGbp}")
-    private String eurToGbp;
-
-    @GetMapping(path = "/item{id}{currency}", produces= MediaType.APPLICATION_JSON_VALUE)
-    public Item getItemById(@PathParam ("id") String id, @PathParam ("currency") String currency) throws IOException {
-        return itemService.getItemById (Long.parseLong (id), currency);
+    @GetMapping(path = "/item{id}{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getItemById(@PathParam("id") String id, @PathParam("currency") String currency) throws IOException {
+        return new ResponseEntity<Item> (itemService.getItemById (Long.parseLong (id), currency), HttpStatus.OK);
     }
 }

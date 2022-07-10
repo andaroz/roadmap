@@ -16,7 +16,7 @@ public class ConvertEurToGbp implements Expression {
         this.value = amount;
     }
 
-    public void getGbp (Double amount) throws IOException {
+    public void getGbp(Double amount) throws IOException {
         Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
         String eurToGbp = properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP);
         this.value = amount * Double.valueOf (eurToGbp);
