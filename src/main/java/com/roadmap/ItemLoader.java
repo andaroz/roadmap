@@ -23,7 +23,7 @@ public class ItemLoader implements CommandLineRunner {
 
     private void loadItems() {
 
-        Item apple = itemRepository.save (Item.builder ()
+        itemRepository.save (Item.builder ()
                 .name ("apple")
                 .description ("Red apple")
                 .uom (UOM.KG.toString ())
@@ -33,7 +33,7 @@ public class ItemLoader implements CommandLineRunner {
                 .amountAvailable (3.0)
                 .build ());
 
-        Item pear = itemRepository.save (Item.builder ()
+        itemRepository.save (Item.builder ()
                 .name ("pear")
                 .description ("Pear Conference")
                 .uom (UOM.KG.toString ())
@@ -43,7 +43,7 @@ public class ItemLoader implements CommandLineRunner {
                 .amountAvailable (10.0)
                 .build ());
 
-        Item milk = itemRepository.save (Item.builder ()
+        itemRepository.save (Item.builder ()
                 .name ("Coconut milk")
                 .description ("Coconut milk")
                 .uom (UOM.L.toString ())
@@ -53,7 +53,7 @@ public class ItemLoader implements CommandLineRunner {
                 .amountAvailable (7.0)
                 .build ());
 
-        Item cucumber = itemRepository.save (Item.builder ()
+        itemRepository.save (Item.builder ()
                 .name ("Cucumber")
                 .description ("Farmers market cucumber")
                 .uom (UOM.KG.toString ())

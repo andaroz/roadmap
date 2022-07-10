@@ -232,7 +232,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         return price;
     }
 
-    public Price calculateTotalPrice(HashMap<Long, ItemWithPrice> itemsInOrder) {
+    public Price calculateTotalPrice(Map<Long, ItemWithPrice> itemsInOrder) {
         Price totalPrice = new Price ();
         double totalNetPrice = 0.00;
         double totalVat = 0.00;

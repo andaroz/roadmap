@@ -51,7 +51,6 @@ public class ItemServiceImpl {
     public List<Item> getAllItemsByType(String type, String currency) {
         List<Item> itemList = itemRepository.getAllItemsByType (type);
         if (currency == null || currency.equalsIgnoreCase (CommonConstants.CURRENCY_EUR)) {
-            System.out.println (itemList.toString ());
             return itemList;
         } else if (currency.equalsIgnoreCase (CommonConstants.CURRENCY_GBP)) {
             return itemListWithConvertedPrices (itemList, currency);

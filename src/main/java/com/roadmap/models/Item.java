@@ -13,7 +13,6 @@ public class Item {
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @NonNull
     private Long id;
     private String name;
     private String description;
@@ -24,9 +23,8 @@ public class Item {
     private Double amountAvailable = 0.0;
 
     @Builder
-    public Item(Long id, String name, String description, String uom, String image,
+    public Item(String name, String description, String uom, String image,
                 String type, Double price, Double amountAvailable) {
-        this.id = id;
         this.name = name;
         this.description = description;
         this.uom = uom;

@@ -9,12 +9,13 @@ import java.util.Properties;
 
 public class TaxCalculator implements Tax {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
-    Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
-    private double vatFull = Double.valueOf (properties.getProperty ("vat.full"));
-    private double vatReduced = Double.valueOf (properties.getProperty ("vat.reduced"));
-    private double vatZero = Double.valueOf (properties.getProperty ("vat.zero"));
+    private Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
+    private double vatFull = Double.parseDouble (properties.getProperty ("vat.full"));
+    private double vatReduced = Double.parseDouble (properties.getProperty ("vat.reduced"));
+    private double vatZero = Double.parseDouble (properties.getProperty ("vat.zero"));
 
     public TaxCalculator() throws IOException {
+    // No args constructor to add IO Exception
     }
 
     @Override

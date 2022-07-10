@@ -29,23 +29,11 @@ public class CareTaker {
         return savedStates.get (index);
     }
 
-    public Memento undo() {
+    public void undo() {
         if (currentState <= 0) {
             currentState = 0;
-            return getMemento (currentState);
         } else {
             currentState--;
-            return getMemento (currentState);
-        }
-    }
-
-    public Memento redo() {
-        if (currentState >= savedStates.size () - 1) {
-            currentState = savedStates.size () - 1;
-            return getMemento (currentState);
-        } else {
-            currentState++;
-            return getMemento (currentState);
         }
     }
 }

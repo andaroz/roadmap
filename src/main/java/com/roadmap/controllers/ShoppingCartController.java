@@ -25,7 +25,7 @@ public class ShoppingCartController {
     }
 
     @PutMapping(path = "/removeFromCart{id}{amount}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> removeFromOrder(@PathParam("id") Long id, @PathParam("amount") double amount) {
+    public ResponseEntity<Order> removeFromOrder(@PathParam("id") Long id, @PathParam("amount") double amount) {
         return new ResponseEntity<> (shoppingCartFacade.removeFromOrder (id, amount), HttpStatus.OK);
     }
 
@@ -35,12 +35,12 @@ public class ShoppingCartController {
     }
 
     @GetMapping(path = "/proceedToCheckout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> proceedToCheckout() {
-        return new ResponseEntity<Checkout> (shoppingCartFacade.proceedToCheckout (), HttpStatus.OK);
+    public ResponseEntity<Checkout> proceedToCheckout() {
+        return new ResponseEntity<> (shoppingCartFacade.proceedToCheckout (), HttpStatus.OK);
     }
 
     @PostMapping(path = "/addCustomerDetails", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addCustomerDetails(@RequestBody Identity identity) {
+    public ResponseEntity<Checkout> addCustomerDetails(@RequestBody Identity identity) {
         return new ResponseEntity<> (shoppingCartFacade.setIdentity (identity), HttpStatus.OK);
     }
 
@@ -50,8 +50,8 @@ public class ShoppingCartController {
     }
 
     @PostMapping(path = "/addShippingAddress", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addShippingAddress(@RequestBody ShippingAddress shippingAddress) {
-        return new ResponseEntity<Checkout> (shoppingCartFacade.setShippingAddress (shippingAddress), HttpStatus.OK);
+    public ResponseEntity<Checkout> addShippingAddress(@RequestBody ShippingAddress shippingAddress) {
+        return new ResponseEntity<> (shoppingCartFacade.setShippingAddress (shippingAddress), HttpStatus.OK);
     }
 
     @GetMapping(path = "/addShippingAddress/undo", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,8 +60,8 @@ public class ShoppingCartController {
     }
 
     @PostMapping(path = "/addPaymentDetails", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addPaymentDetails(@RequestBody PaymentDetails paymentDetails) {
-        return new ResponseEntity<Checkout> (shoppingCartFacade.setPaymentDetails (paymentDetails), HttpStatus.OK);
+    public ResponseEntity<Checkout> addPaymentDetails(@RequestBody PaymentDetails paymentDetails) {
+        return new ResponseEntity<> (shoppingCartFacade.setPaymentDetails (paymentDetails), HttpStatus.OK);
     }
 
     @GetMapping(path = "/addPaymentDetails/undo", produces = MediaType.APPLICATION_JSON_VALUE)
