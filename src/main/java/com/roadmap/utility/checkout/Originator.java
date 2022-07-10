@@ -17,16 +17,15 @@ public class Originator {
         return new Memento (checkout);
     }
 
-    public Memento setIdentity(Order order, Identity identity) {
+    public void setIdentity(Order order, Identity identity) {
         checkout = new Checkout ();
         checkoutDetails = new CheckoutDetails ();
         checkoutDetails.setIdentity (identity);
         checkout.setCheckoutDetails (checkoutDetails);
         checkout.setOrder (order);
-        return new Memento (checkout);
     }
 
-    public Memento setShippingAddress(Order order, ShippingAddress shippingAddress, CheckoutDetails previousCheckoutDetails) {
+    public void setShippingAddress(Order order, ShippingAddress shippingAddress, CheckoutDetails previousCheckoutDetails) {
         if (!previousCheckoutDetails.isCheckedOut ()) {
             checkout = new Checkout ();
             checkout.setOrder (order);
@@ -38,10 +37,9 @@ public class Originator {
             checkoutDetails.setShippingAddress (shippingAddress);
             checkout.setCheckoutDetails (checkoutDetails);
         }
-        return new Memento (checkout);
     }
 
-    public Memento setPaymentDetails(Order order, PaymentDetails paymentDetails, CheckoutDetails previousCheckoutDetails) {
+    public void setPaymentDetails(Order order, PaymentDetails paymentDetails, CheckoutDetails previousCheckoutDetails) {
         if (!previousCheckoutDetails.isCheckedOut ()) {
             checkout = new Checkout ();
             checkout.setOrder (order);
@@ -51,17 +49,15 @@ public class Originator {
             checkoutDetails.setPaymentDetails (paymentDetails);
             checkout.setCheckoutDetails (checkoutDetails);
         }
-        return new Memento (checkout);
     }
 
-    public Memento proceedPayment(Order order, CheckoutDetails currentCheckoutDetails) {
+    public void proceedPayment(Order order, CheckoutDetails currentCheckoutDetails) {
         if (!currentCheckoutDetails.isCheckedOut ()) {
             checkout = new Checkout ();
             checkout.setOrder (order);
             currentCheckoutDetails.setCheckedOut (true);
             checkout.setCheckoutDetails (currentCheckoutDetails);
         }
-        return new Memento (checkout);
     }
 
     public Memento storeInMemento() {

@@ -12,15 +12,15 @@ import java.util.Date;
 public class GlobalControllerAdvice {
 
     @ExceptionHandler(ItemNotFoundException.class)
-    public ResponseEntity<?> handleNotFoundException(ItemNotFoundException exception, WebRequest request) {
+    public ResponseEntity<ErrorDetails> handleNotFoundException(ItemNotFoundException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails (new Date (), exception.getMessage (), request.getDescription (false));
-        return new ResponseEntity<ErrorDetails> (errorDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<> (errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(BadRequestException exception, WebRequest request) {
+    public ResponseEntity<ErrorDetails> handleBadRequestException(BadRequestException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails (new Date (), exception.getMessage (), request.getDescription (false));
-        return new ResponseEntity<ErrorDetails> (errorDetails, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<> (errorDetails, HttpStatus.BAD_REQUEST);
     }
 
 }

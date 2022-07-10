@@ -32,7 +32,7 @@ public class ShopController {
     }
 
     @GetMapping(path = "/item{id}{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getItemById(@PathParam("id") String id, @PathParam("currency") String currency) throws IOException {
-        return new ResponseEntity<Item> (itemService.getItemById (Long.parseLong (id), currency), HttpStatus.OK);
+    public ResponseEntity<Item> getItemById(@PathParam("id") String id, @PathParam("currency") String currency) throws IOException {
+        return new ResponseEntity<> (itemService.getItemById (Long.parseLong (id), currency), HttpStatus.OK);
     }
 }
