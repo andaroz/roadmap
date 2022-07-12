@@ -37,7 +37,7 @@ class ShoppingCartControllerTest {
     private MockMvc mockMvc;
 
     private final long ID = 1L;
-    private final String PATH = CommonConstants.BASE_PATH + CommonConstants.SHOPING_CART_PATH;
+    private final String PATH = CommonConstants.SHOPING_CART_PATH;
     private Item item;
     private List<Item> items = new ArrayList<> ();
     private Order order;

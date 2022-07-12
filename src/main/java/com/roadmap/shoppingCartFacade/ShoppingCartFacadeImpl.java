@@ -11,6 +11,7 @@ import com.roadmap.utility.taxCalculation.FullVatPrice;
 import com.roadmap.utility.taxCalculation.Price;
 import com.roadmap.utility.taxCalculation.ReducedVatPrice;
 import com.roadmap.utility.taxCalculation.TaxCalculator;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,11 +19,11 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+@Log
 @Service
 public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 
     private static final DecimalFormat df = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
-    private final ItemRepository itemRepository;
     private ItemServiceImpl itemService;
     private TaxCalculator taxCalculator;
     private Originator originator = new Originator ();
@@ -31,7 +32,6 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     private Order order;
 
     public ShoppingCartFacadeImpl(ItemRepository itemRepository, Order order) throws IOException {
-        this.itemRepository = itemRepository;
         this.itemService = new ItemServiceImpl (itemRepository);
         this.taxCalculator = new TaxCalculator ();
         if (order.getInstance () == null) {
@@ -47,10 +47,10 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
         Item item = itemService.getItemById (itemId);
 
         boolean itemAlreadyInTheOrder = false;
-        double orderedAmount = 0.0;
+        double orderedAmount;
 
         if (item.getAmountAvailable () < amount) {
-            System.out.println ("There is only " + item.getAmountAvailable () + " for item " + item.getName () + ". Please choose amount which is available!");
+            log.info ("There is only " + item.getAmountAvailable () + " for item " + item.getName () + ". Please choose amount which is available!");
         } else {
             if (itemsInOrder.size () > 0) {
                 for (Map.Entry<Long, ItemWithPrice> itemListItem : itemsInOrder.entrySet ()) {
@@ -98,7 +98,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
                     itemWithPrice.setAmountOrdered (remainingAmount);
                     itemsInOrder.put (itemId, itemWithPrice);
                     itemService.increaseAvailableAmount (amount, itemId);
-                } else if (orderItemAmount <= amount) {
+                } else {
                     itemsInOrder.remove (itemId);
                     itemService.increaseAvailableAmount (orderItemAmount, itemId);
                 }

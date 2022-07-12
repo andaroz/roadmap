@@ -1,16 +1,16 @@
 package com.roadmap.shoppingCartFacade;
 
+import com.roadmap.exceptions.BadRequestException;
 import com.roadmap.models.*;
+import com.roadmap.repositories.ItemRepository;
 import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
-import com.roadmap.utility.checkout.CareTaker;
-import com.roadmap.utility.checkout.Memento;
-import com.roadmap.utility.checkout.Originator;
 import com.roadmap.utility.taxCalculation.Price;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -20,13 +20,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 
 class ShoppingCartFacadeImplTest {
 
+    @MockBean
+    private ItemRepository itemRepository;
+
     @Mock
     private ItemServiceImpl itemService;
-    @Mock
+
     private ShoppingCartFacadeImpl shoppingCartFacade;
 
     private static final Long ID = 1L;
@@ -40,11 +42,10 @@ class ShoppingCartFacadeImplTest {
     private static final String CARD_NUMBER = "1234123412341234";
     private static final String EXPIRY_DATE = "01/25";
     private static final String CVC = "123";
+    private static final Double NET_PRICE = 2.0;
+    private static final Double REDUCED_VAT = 0.05;
+    private static final Double VAT = 0.21;
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat (CommonConstants.DECIMAL_FOORMAT_PATTERN);
-    private int currentState = 0;
-    private Originator originator = new Originator ();
-    private CareTaker careTaker = new CareTaker ();
-    private Checkout checkout = new Checkout ();
     private Item item;
     private List<Item> items = new ArrayList<> ();
     private Order order;
@@ -57,11 +58,8 @@ class ShoppingCartFacadeImplTest {
     private PaymentDetails paymentDetails = new PaymentDetails ();
     private Item vegetable = new Item ();
 
-    ShoppingCartFacadeImplTest() throws IOException {
-    }
-
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         MockitoAnnotations.initMocks (this);
         item = new Item ();
         item.setId (ID);
@@ -96,6 +94,7 @@ class ShoppingCartFacadeImplTest {
         itemsInOrder.put (1L, itemWithPrice);
         order.setOrderItems (itemsInOrder);
         order.setTotalPrice (price);
+        shoppingCartFacade = new ShoppingCartFacadeImpl (itemRepository, order);
     }
 
     @Test
@@ -115,9 +114,9 @@ class ShoppingCartFacadeImplTest {
     @Test
     void getOrder() {
         HashMap<Long, ItemWithPrice> itemsInOrder = order.getOrderItems ();
-        doReturn (price).when (shoppingCartFacade).calculateTotalPrice (itemsInOrder);
-        order.setTotalPrice (price);
-        assertEquals (itemWithPrice.getPrice ().getGrossPrice (), order.getTotalPrice ().getGrossPrice ());
+        Price totalPrice = shoppingCartFacade.calculateTotalPrice (itemsInOrder);
+        order.setTotalPrice (totalPrice);
+        assertEquals (itemWithPrice.getPrice ().getGrossPrice () * 2.0, order.getTotalPrice ().getGrossPrice ());
         assertEquals (1, order.getOrderItems ().size ());
     }
 
@@ -131,36 +130,36 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void proceedToCheckout() {
-        Memento memento = originator.proceedToCheckout (order);
-        careTaker.addMemento (memento);
-        currentState = careTaker.getCurrentState ();
-        Checkout newCheckout = careTaker.getMemento (currentState).getCheckout ();
+        Checkout newCheckout = shoppingCartFacade.proceedToCheckout ();
         assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
-        assertNull (checkoutDetails.getIdentity ());
+        assertNull (newCheckout.getCheckoutDetails ().getIdentity ());
     }
 
     @Test
     void setIdentity() {
-        originator.setIdentity (order, setIdentityData ());
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        Checkout savedCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity savedIdentity = savedCheckout.getCheckoutDetails ().getIdentity ();
-        assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
-        assertEquals (NAME, savedIdentity.getName ());
-        assertEquals (LAST_NAME, savedIdentity.getLastName ());
+        Checkout newCheckout = shoppingCartFacade.setIdentity (new Identity (NAME, LAST_NAME));
+        assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
+        assertEquals (NAME, newCheckout.getCheckoutDetails ().getIdentity ().getName ());
+        assertEquals (LAST_NAME, newCheckout.getCheckoutDetails ().getIdentity ().getLastName ());
+    }
+
+    @Test
+    void setIdentity_ReturnsBadRequestException() {
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setIdentity (new Identity ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
     }
 
     @Test
     void setShippingAddress() {
-        checkoutDetails.setIdentity (setIdentityData ());
-        originator.setShippingAddress (order, setShippingAddressData (), checkoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        Checkout savedCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity savedIdentity = savedCheckout.getCheckoutDetails ().getIdentity ();
-        ShippingAddress savedShippingAddress = savedCheckout.getCheckoutDetails ().getShippingAddress ();
-        assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        Checkout newCheckout = shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        Identity savedIdentity = newCheckout.getCheckoutDetails ().getIdentity ();
+        ShippingAddress savedShippingAddress = newCheckout.getCheckoutDetails ().getShippingAddress ();
+        assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
         assertEquals (NAME, savedIdentity.getName ());
         assertEquals (COUNTRY, savedShippingAddress.getCountry ());
         assertEquals (STREET, savedShippingAddress.getStreet ());
@@ -169,17 +168,38 @@ class ShoppingCartFacadeImplTest {
     }
 
     @Test
+    void setShippingAddress_ReturnsBadRequestException() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setShippingAddress (new ShippingAddress ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
+    }
+
+    @Test
+    void setShippingAddress_ReturnsBadRequestException_MissingIdentity() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        shoppingCartFacade.undo ();
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, exception.getMessage ());
+    }
+
+    @Test
     void setPaymentDetails() {
-        checkoutDetails.setIdentity (setIdentityData ());
-        checkoutDetails.setShippingAddress (setShippingAddressData ());
-        originator.setPaymentDetails (order, setPaymentDetailsData (), checkoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        Checkout savedCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity savedIdentity = savedCheckout.getCheckoutDetails ().getIdentity ();
-        ShippingAddress savedShippingAddress = savedCheckout.getCheckoutDetails ().getShippingAddress ();
-        PaymentDetails savedPaymentDetails = savedCheckout.getCheckoutDetails ().getPaymentDetails ();
-        assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        Checkout newCheckout = shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+        Identity savedIdentity = newCheckout.getCheckoutDetails ().getIdentity ();
+        ShippingAddress savedShippingAddress = newCheckout.getCheckoutDetails ().getShippingAddress ();
+        PaymentDetails savedPaymentDetails = newCheckout.getCheckoutDetails ().getPaymentDetails ();
+        assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
         assertEquals (NAME, savedIdentity.getName ());
         assertEquals (COUNTRY, savedShippingAddress.getCountry ());
         assertEquals (CARD_OWNER, savedPaymentDetails.getCardOwner ());
@@ -189,52 +209,140 @@ class ShoppingCartFacadeImplTest {
     }
 
     @Test
+    void setPaymentDetails_ReturnsBadRequestException() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setPaymentDetails (new PaymentDetails ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
+    }
+
+    @Test
+    void setPaymentDetails_ReturnsBadRequestException_MissingIdentity() {
+        shoppingCartFacade.proceedToCheckout ();
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, exception.getMessage ());
+    }
+
+    @Test
+    void setPaymentDetails_ReturnsBadRequestException_MissingShippingAddress() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_SHIPPING_INFORMATION, exception.getMessage ());
+    }
+
+    @Test
     void proceedPayment() {
-        checkoutDetails.setIdentity (setIdentityData ());
-        checkoutDetails.setShippingAddress (setShippingAddressData ());
-        checkoutDetails.setPaymentDetails (setPaymentDetailsData ());
-        originator.proceedPayment (order, checkoutDetails);
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        Checkout savedCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity savedIdentity = savedCheckout.getCheckoutDetails ().getIdentity ();
-        ShippingAddress savedShippingAddress = savedCheckout.getCheckoutDetails ().getShippingAddress ();
-        PaymentDetails savedPaymentDetails = savedCheckout.getCheckoutDetails ().getPaymentDetails ();
-        assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+        Checkout newCheckout = shoppingCartFacade.proceedPayment ();
+        Identity savedIdentity = newCheckout.getCheckoutDetails ().getIdentity ();
+        ShippingAddress savedShippingAddress = newCheckout.getCheckoutDetails ().getShippingAddress ();
+        PaymentDetails savedPaymentDetails = newCheckout.getCheckoutDetails ().getPaymentDetails ();
+        assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
         assertEquals (NAME, savedIdentity.getName ());
         assertEquals (COUNTRY, savedShippingAddress.getCountry ());
         assertEquals (CARD_OWNER, savedPaymentDetails.getCardOwner ());
-        assertTrue (savedCheckout.getCheckoutDetails ().isCheckedOut ());
+        assertTrue (newCheckout.getCheckoutDetails ().isCheckedOut ());
+    }
+
+    @Test
+    void proceedPayment_ReturnsBadRequestException_MissingPaymentInformation() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.proceedPayment ();
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_PAYMENT_INFORMATION, exception.getMessage ());
+    }
+
+    @Test
+    void proceedPayment_ReturnsBadRequestException_MissingIdentityInformation() {
+        shoppingCartFacade.proceedToCheckout ();
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.proceedPayment ();
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, exception.getMessage ());
+    }
+
+    @Test
+    void proceedPayment_ReturnsBadRequestException_MissingSHippingAddress() {
+        shoppingCartFacade.proceedToCheckout ();
+        shoppingCartFacade.setIdentity (setIdentityData ());
+        BadRequestException exception = assertThrows (BadRequestException.class, () -> {
+            shoppingCartFacade.proceedPayment ();
+        });
+
+        assertEquals (CommonConstants.MESSAGE_MISSING_SHIPPING_INFORMATION, exception.getMessage ());
     }
 
     @Test
     void undo() {
         // proceedPayment and validate checkout which is saved in in Memento list
-        checkout.setOrder (order);
-        checkout.setCheckoutDetails (new CheckoutDetails ());
-        Memento memento = new Memento (checkout);
-        careTaker.addMemento (memento);
-        currentState = careTaker.getCurrentState ();
-        Checkout newCheckout = careTaker.getMemento (currentState).getCheckout ();
+        shoppingCartFacade.proceedToCheckout ();
+        Checkout newCheckout = shoppingCartFacade.proceedToCheckout ();
         assertEquals (1, newCheckout.getOrder ().getOrderItems ().size ());
         assertNull (checkoutDetails.getIdentity ());
         // add identity and validate new state
-        originator.setIdentity (order, setIdentityData ());
-        careTaker.addMemento (originator.storeInMemento ());
-        currentState = careTaker.getCurrentState ();
-        Checkout savedCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity savedIdentity = savedCheckout.getCheckoutDetails ().getIdentity ();
-        assertEquals (1, savedCheckout.getOrder ().getOrderItems ().size ());
+        Checkout checkoutWithIdentity = shoppingCartFacade.setIdentity (setIdentityData ());
+        Identity savedIdentity = checkoutWithIdentity.getCheckoutDetails ().getIdentity ();
+        assertEquals (1, checkoutWithIdentity.getOrder ().getOrderItems ().size ());
         assertEquals (NAME, savedIdentity.getName ());
         assertEquals (LAST_NAME, savedIdentity.getLastName ());
         // undo setIdentity and validate that current state is the same as before
-        careTaker.undo ();
-        currentState = careTaker.getCurrentState ();
-        Checkout previousCheckout = careTaker.getMemento (currentState).getCheckout ();
-        Identity previousIdentity = previousCheckout.getCheckoutDetails ().getIdentity ();
-        assertEquals (1, previousCheckout.getOrder ().getOrderItems ().size ());
+        Checkout undoSetIdentity = shoppingCartFacade.undo ();
+        Identity previousIdentity = undoSetIdentity.getCheckoutDetails ().getIdentity ();
+        assertEquals (1, undoSetIdentity.getOrder ().getOrderItems ().size ());
         assertNull (previousIdentity);
-        assertEquals (2, careTaker.getSavedStates ().size ());
+    }
+
+    @Test
+    void getItemWithPrice() {
+        ItemWithPrice newItemWithPrice = shoppingCartFacade.getItemWithPrice (item);
+        Price newPrice = newItemWithPrice.getPrice ();
+        assertEquals (newPrice.getNetPrice (), price.getNetPrice ());
+        assertEquals (newPrice.getTax (), price.getTax ());
+        assertEquals (newPrice.getGrossPrice (), price.getGrossPrice ());
+    }
+
+
+    @Test
+    void getPrice_reducedVatPrice_Fruits() {
+        Price fruitPrice = shoppingCartFacade.getPrice (NET_PRICE, Type.FRUIT.toString ());
+        assertEquals (NET_PRICE, fruitPrice.getNetPrice ());
+        assertEquals (NET_PRICE * REDUCED_VAT, fruitPrice.getTax ());
+        assertEquals (NET_PRICE * REDUCED_VAT + NET_PRICE, fruitPrice.getGrossPrice ());
+    }
+
+    @Test
+    void getPrice_reducedVatPrice_Vegetables() {
+        Price fruitPrice = shoppingCartFacade.getPrice (NET_PRICE, Type.VEGETABLE.toString ());
+        assertEquals (NET_PRICE, fruitPrice.getNetPrice ());
+        assertEquals (NET_PRICE * REDUCED_VAT, fruitPrice.getTax ());
+        assertEquals (NET_PRICE * REDUCED_VAT + NET_PRICE, fruitPrice.getGrossPrice ());
+    }
+
+    @Test
+    void getPrice_reducedVatPrice() {
+        Price fruitPrice = shoppingCartFacade.getPrice (NET_PRICE, Type.DRINK.toString ());
+        assertEquals (NET_PRICE, fruitPrice.getNetPrice ());
+        assertEquals (NET_PRICE * VAT, fruitPrice.getTax ());
+        assertEquals (NET_PRICE * VAT + NET_PRICE, fruitPrice.getGrossPrice ());
     }
 
     private Identity setIdentityData() {
