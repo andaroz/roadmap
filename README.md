@@ -16,26 +16,33 @@ Design Patterns used:
 To run application, please run RoadMapApplication class
 
 APIs:
-http://localhost:8888/eShop/ - indexPage
-GET http://localhost:8888/eShop/items/{type}{currency} - gets items by type (acceptable values are: FRUIT, VEGETABLE, DRINK, SPICE, NUTS_AND_SEEDS, MEAT, DAIRY).
+
+GET http://localhost:8888/eShop/items/{type}{currency} - returns list of items by type (acceptable values are: FRUIT, VEGETABLE, DRINK, SPICE, NUTS_AND_SEEDS, MEAT, DAIRY).
                                                      Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
                                                      Example: http://localhost:8888/eShop/items/byType?type=FRUIT&currency=GBP
-GET http://localhost:8888/eShop/items{currency} - gets all items. Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
-                                                Example: http://localhost:8888/eShop/items?currency=EUR
-GET http://localhost:8888/eShop/item{id}{currency} - gets item by Id. Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
-                                                http://localhost:8888/eShop/item?id=1&currency=EUR
 
-GET http://localhost:8888/cart/shoppingCart - shows order shopping cart
+GET http://localhost:8888/eShop/items - returns list of all items.
 
-POST http://localhost:8888/cart/addToCart{id}{amount} - adds items to shopping cart
+GET http://localhost:8888/eShop/items{currency} - returns list of all items. Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
+                                                Example: http://localhost:8888/eShop/items?currency=GBP
+
+GET http://localhost:8888/eShop/item{id} - returns item by id.
+                                            Example: http://localhost:8888/eShop/item?id=1
+
+GET http://localhost:8888/eShop/item{id}{currency} - returns item by Id and price is converted to currency of choice. Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
+                                                http://localhost:8888/eShop/item?id=1&currency=GBP
+
+GET http://localhost:8888/cart/shoppingCart - returns order in shopping cart. It containc list of items in order as well as total price which includes also calculated tax and gross price.
+
+POST http://localhost:8888/cart/addToCart{id}{amount} - adds items to order in shopping cart
                                                  Example: http://localhost:8888/cart/addToCart?id=2&amount=3
 
-PUT http://localhost:8888/cart/removeFromCart{id}{amount} - removes items from shoping cart
+PUT http://localhost:8888/cart/removeFromCart{id}{amount} - removes items from order in shopping cart
                                                 Example: http://localhost:8888/cart/removeFromCart?id=2&amount=1
 
-PUT http://localhost:8888/cart/proceedToCheckout
+PUT http://localhost:8888/cart/proceedToCheckout - returns Checkout object which contains order and empty CeckoutDetails object
 
-POST http://localhost:8888/cart/addCustomerDetails - add customer details
+POST http://localhost:8888/cart/addCustomerDetails - add customer details (Identity)
                                                 Example:
                                                 POST http://localhost:8888/cart/addCustomerDetails
                                                 Accept: */*
@@ -47,7 +54,7 @@ POST http://localhost:8888/cart/addCustomerDetails - add customer details
 
 GET http://localhost:8888/cart/addCustomerDetails/undo - undo added customer details
 
-POST http://localhost:8888/cart/addShippingAddress - add shipping address
+POST http://localhost:8888/cart/addShippingAddress - add shipping address. Can be proceeded only if customer details (Identity) is added
                                                     Example:
                                                     POST http://localhost:8888/cart/addShippingAddress
                                                     Accept: */*
@@ -61,7 +68,7 @@ POST http://localhost:8888/cart/addShippingAddress - add shipping address
 
 GET http://localhost:8888/cart/addShippingAddress/undo - undo added shipping address
 
-POST http://localhost:8888/cart/addPaymentDetails - add payment details details
+POST http://localhost:8888/cart/addPaymentDetails - add payment details details. Can be proceeded only if Identity and ShippingAddress are added
                                                     Example:
                                                     GET http://localhost:8888/cart/addSPaymentDetails HTTP/1.1
                                                     Content-Type: text/plain
@@ -75,6 +82,4 @@ POST http://localhost:8888/cart/addPaymentDetails - add payment details details
 
 GET http://localhost:8888/cart/addPaymentDetails/undo - undo added payment details details
 
-GET http://localhost:8888/cart/proceedPayment - proceeds payment and reset Order
-
-The VAT in Latvia for food: 21%, Fresh fruits, berries and vegetables = 5%
+GET http://localhost:8888/cart/proceedPayment - proceeds payment, returns order and sets  and reset Order and sets checkedOut=true.

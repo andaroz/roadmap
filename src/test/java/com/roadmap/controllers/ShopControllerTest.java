@@ -81,7 +81,7 @@ class ShopControllerTest {
     void getAllItems() throws Exception {
         when (itemService.getAllItems (CommonConstants.CURRENCY_EUR)).thenReturn (items);
 
-        mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?currency=EUR"))
+        mockMvc.perform (get (CommonConstants.ESHOP_PATH + "/items?currency=EUR"))
                 .andExpect (status ().isOk ())
                 .andDo (print ());
 
@@ -94,7 +94,7 @@ class ShopControllerTest {
                 .filter (i -> i.getType ().equals (Type.FRUIT.toString ()))
                 .collect (Collectors.toList ());
         doReturn (fruits).when (itemService).getAllItemsByType (Type.FRUIT.toString (), CommonConstants.CURRENCY_EUR);
-        mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/items?type=FRUIT&currency=EUR"))
+        mockMvc.perform (get (CommonConstants.ESHOP_PATH + "/items/byType?type=FRUIT&currency=EUR"))
                 .andExpect (status ().isOk ())
                 .andDo (print ());
 
@@ -106,7 +106,7 @@ class ShopControllerTest {
     void getItemById() throws Exception {
         when (itemService.getItemById (ID, CommonConstants.CURRENCY_EUR)).thenReturn (item);
 
-        mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/item?id=1&currency=EUR"))
+        mockMvc.perform (get (CommonConstants.ESHOP_PATH + "/item?id=1&currency=EUR"))
                 .andExpect (status ().isOk ())
                 .andDo (print ());
     }
@@ -115,7 +115,7 @@ class ShopControllerTest {
     void getItemById_throwsItemNotFoundException() throws Exception {
         ItemNotFoundException exception = new ItemNotFoundException (CommonConstants.MESSAGE_NOT_FOUND, true);
         when (itemService.getItemById (20L, CommonConstants.CURRENCY_EUR)).thenThrow (exception);
-        mockMvc.perform (get (CommonConstants.BASE_PATH + CommonConstants.ESHOP_PATH + "/item?id=20&currency=EUR"))
+        mockMvc.perform (get (CommonConstants.ESHOP_PATH + "/item?id=20&currency=EUR"))
                 .andExpect (status ().isNotFound ())
                 .andExpect (result -> assertTrue (result.getResolvedException () instanceof ItemNotFoundException))
                 .andExpect (result -> assertEquals ((CommonConstants.MESSAGE_NOT_FOUND), result.getResolvedException ().getMessage ()))
