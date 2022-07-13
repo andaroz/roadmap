@@ -1,11 +1,11 @@
-package com.roadmap.shoppingCartFacade;
+package com.roadmap.shopping_cart_facade;
 
 import com.roadmap.exceptions.BadRequestException;
 import com.roadmap.models.*;
 import com.roadmap.repositories.ItemRepository;
 import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
-import com.roadmap.utility.taxCalculation.Price;
+import com.roadmap.utility.tax_calculation.Price;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -145,8 +145,9 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setIdentity_ReturnsBadRequestException() {
+        Identity identity = new Identity ();
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setIdentity (new Identity ());
+            shoppingCartFacade.setIdentity (identity);
         });
 
         assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
@@ -169,10 +170,11 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setShippingAddress_ReturnsBadRequestException() {
+        ShippingAddress shippingAddress = new ShippingAddress ();
         shoppingCartFacade.proceedToCheckout ();
         shoppingCartFacade.setIdentity (setIdentityData ());
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setShippingAddress (new ShippingAddress ());
+            shoppingCartFacade.setShippingAddress (shippingAddress);
         });
 
         assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
@@ -180,11 +182,12 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setShippingAddress_ReturnsBadRequestException_MissingIdentity() {
+        ShippingAddress shippingAddress = setShippingAddressData ();
         shoppingCartFacade.proceedToCheckout ();
         shoppingCartFacade.setIdentity (setIdentityData ());
         shoppingCartFacade.undo ();
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setShippingAddress (setShippingAddressData ());
+            shoppingCartFacade.setShippingAddress (shippingAddress);
         });
 
         assertEquals (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, exception.getMessage ());
@@ -210,11 +213,12 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setPaymentDetails_ReturnsBadRequestException() {
+        PaymentDetails paymentDetails = new PaymentDetails ();
         shoppingCartFacade.proceedToCheckout ();
         shoppingCartFacade.setIdentity (setIdentityData ());
         shoppingCartFacade.setShippingAddress (setShippingAddressData ());
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setPaymentDetails (new PaymentDetails ());
+            shoppingCartFacade.setPaymentDetails (paymentDetails);
         });
 
         assertEquals (CommonConstants.MESSAGE_BAD_REQUEST, exception.getMessage ());
@@ -222,9 +226,10 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setPaymentDetails_ReturnsBadRequestException_MissingIdentity() {
+        PaymentDetails paymentDetails = setPaymentDetailsData ();
         shoppingCartFacade.proceedToCheckout ();
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+            shoppingCartFacade.setPaymentDetails (paymentDetails);
         });
 
         assertEquals (CommonConstants.MESSAGE_MISSING_IDENTITY_INFORMATION, exception.getMessage ());
@@ -232,10 +237,11 @@ class ShoppingCartFacadeImplTest {
 
     @Test
     void setPaymentDetails_ReturnsBadRequestException_MissingShippingAddress() {
+        PaymentDetails paymentDetails = setPaymentDetailsData ();
         shoppingCartFacade.proceedToCheckout ();
         shoppingCartFacade.setIdentity (setIdentityData ());
         BadRequestException exception = assertThrows (BadRequestException.class, () -> {
-            shoppingCartFacade.setPaymentDetails (setPaymentDetailsData ());
+            shoppingCartFacade.setPaymentDetails (paymentDetails);
         });
 
         assertEquals (CommonConstants.MESSAGE_MISSING_SHIPPING_INFORMATION, exception.getMessage ());

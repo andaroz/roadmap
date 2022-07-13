@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class PropertiesLoader {
+public final class PropertiesLoader {
+    private PropertiesLoader(){
+    }
     public static Properties loadProperties(String fileName) throws IOException {
         Properties properties = new Properties();
         InputStream inputStream = PropertiesLoader.class

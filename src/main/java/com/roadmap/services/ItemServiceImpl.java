@@ -4,7 +4,7 @@ import com.roadmap.exceptions.ItemNotFoundException;
 import com.roadmap.models.Item;
 import com.roadmap.repositories.ItemRepository;
 import com.roadmap.utility.CommonConstants;
-import com.roadmap.utility.currencyConverter.ConvertEurToGbp;
+import com.roadmap.utility.currency_converter.ConvertEurToGbp;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

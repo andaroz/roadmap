@@ -6,7 +6,7 @@ import com.roadmap.models.Item;
 import com.roadmap.models.Type;
 import com.roadmap.repositories.ItemRepository;
 import com.roadmap.utility.CommonConstants;
-import com.roadmap.utility.currencyConverter.ConvertEurToGbp;
+import com.roadmap.utility.currency_converter.ConvertEurToGbp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ItemServiceImplTest {
+class ItemServiceImplTest {
 
     @Mock
     private ItemRepository itemRepository;
@@ -35,7 +35,7 @@ public class ItemServiceImplTest {
     private Properties properties = PropertiesLoader.loadProperties (CommonConstants.PROPERTIES_FILE);
     private double eurToGbp = Double.valueOf (properties.getProperty (CommonConstants.PROPERTY_KEY_EUR_TO_GBP));
 
-    public ItemServiceImplTest() throws IOException {
+    private ItemServiceImplTest() throws IOException {
         // empty constructor to add IOException
     }
 

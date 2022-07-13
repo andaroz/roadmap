@@ -1,6 +1,6 @@
 package com.roadmap.models;
 
-import com.roadmap.utility.taxCalculation.Price;
+import com.roadmap.utility.tax_calculation.Price;
 import lombok.Getter;
 import lombok.Setter;
 

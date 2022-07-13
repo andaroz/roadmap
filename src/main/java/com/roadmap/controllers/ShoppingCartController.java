@@ -1,7 +1,7 @@
 package com.roadmap.controllers;
 
 import com.roadmap.models.*;
-import com.roadmap.shoppingCartFacade.ShoppingCartFacadeImpl;
+import com.roadmap.shopping_cart_facade.ShoppingCartFacadeImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.roadmap.utility.taxCalculation;
+package com.roadmap.utility.tax_calculation;
 
 public class ReducedVatPrice {
     private Price price;
