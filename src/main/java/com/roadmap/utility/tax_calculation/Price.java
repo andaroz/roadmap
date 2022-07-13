@@ -1,4 +1,4 @@
-package com.roadmap.utility.taxCalculation;
+package com.roadmap.utility.tax_calculation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

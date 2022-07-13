@@ -1,4 +1,4 @@
-package com.roadmap.shoppingCartFacade;
+package com.roadmap.shopping_cart_facade;
 
 import com.roadmap.models.*;
 

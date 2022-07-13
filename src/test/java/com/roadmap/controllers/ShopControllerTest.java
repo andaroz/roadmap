@@ -7,7 +7,7 @@ import com.roadmap.models.Item;
 import com.roadmap.models.Type;
 import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
-import com.roadmap.utility.currencyConverter.ConvertEurToGbp;
+import com.roadmap.utility.currency_converter.ConvertEurToGbp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

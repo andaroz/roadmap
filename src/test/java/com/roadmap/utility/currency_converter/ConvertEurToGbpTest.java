@@ -1,4 +1,4 @@
-package com.roadmap.utility.currencyConverter;
+package com.roadmap.utility.currency_converter;
 
 import com.roadmap.config.PropertiesLoader;
 import com.roadmap.utility.CommonConstants;

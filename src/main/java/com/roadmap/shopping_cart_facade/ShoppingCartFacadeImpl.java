@@ -1,4 +1,4 @@
-package com.roadmap.shoppingCartFacade;
+package com.roadmap.shopping_cart_facade;
 
 import com.roadmap.exceptions.BadRequestException;
 import com.roadmap.models.*;
@@ -7,10 +7,10 @@ import com.roadmap.services.ItemServiceImpl;
 import com.roadmap.utility.CommonConstants;
 import com.roadmap.utility.checkout.CareTaker;
 import com.roadmap.utility.checkout.Originator;
-import com.roadmap.utility.taxCalculation.FullVatPrice;
-import com.roadmap.utility.taxCalculation.Price;
-import com.roadmap.utility.taxCalculation.ReducedVatPrice;
-import com.roadmap.utility.taxCalculation.TaxCalculator;
+import com.roadmap.utility.tax_calculation.FullVatPrice;
+import com.roadmap.utility.tax_calculation.Price;
+import com.roadmap.utility.tax_calculation.ReducedVatPrice;
+import com.roadmap.utility.tax_calculation.TaxCalculator;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
@@ -204,7 +204,7 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
     @Override
     public Checkout undo() {
         careTaker.undo ();
-        int currentState = careTaker.getCurrentState ();
+        currentState = careTaker.getCurrentState ();
         return careTaker.getMemento (currentState).getCheckout ();
     }
 

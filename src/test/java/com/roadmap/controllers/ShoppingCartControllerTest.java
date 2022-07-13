@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roadmap.exceptions.BadRequestException;
 import com.roadmap.exceptions.GlobalControllerAdvice;
 import com.roadmap.models.*;
-import com.roadmap.shoppingCartFacade.ShoppingCartFacadeImpl;
+import com.roadmap.shopping_cart_facade.ShoppingCartFacadeImpl;
 import com.roadmap.utility.CommonConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
