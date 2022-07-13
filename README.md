@@ -17,7 +17,7 @@ To run application, please run RoadMapApplication class
 
 APIs:
 
-GET http://localhost:8888/eShop/items/{type}{currency} - returns list of items by type (acceptable values are: FRUIT, VEGETABLE, DRINK, SPICE, NUTS_AND_SEEDS, MEAT, DAIRY).
+GET http://localhost:8888/eShop/items/byType{type}{currency} - returns list of items by type (acceptable values are: FRUIT, VEGETABLE, DRINK, SPICE, NUTS_AND_SEEDS, MEAT, DAIRY).
                                                      Displayable currency can be changed by passing path variable "currency" (acceptable values are: EUR, GBP).
                                                      Example: http://localhost:8888/eShop/items/byType?type=FRUIT&currency=GBP
 
